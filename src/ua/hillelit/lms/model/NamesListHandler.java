@@ -2,16 +2,14 @@ package ua.hillelit.lms.model;
 
 import static java.lang.System.*;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import ua.hillelit.lms.model.annotations.AfterSuite;
 import ua.hillelit.lms.model.annotations.BeforeSuite;
 import ua.hillelit.lms.model.annotations.Test;
@@ -25,6 +23,7 @@ public class NamesListHandler {
 
   /**
    * Adds to list names from source file
+   *
    * @param filePath path to file with names
    */
   private void add(String filePath) {
@@ -45,10 +44,39 @@ public class NamesListHandler {
     }
   }
 
+  /**
+   * Constructor that calls add method
+   *
+   * @param filePath path to file with names
+   */
   public NamesListHandler(String filePath) {
-    if(filePath != null) {
+    if (filePath != null) {
       this.add(filePath);
     }
+  }
+
+  /**
+   * When we need to put to List just one human
+   *
+   * @param human - object of class {@link Human}
+   */
+  public void add(Human human) {
+    if (human != null) {
+      nameList.add(human);
+    }
+  }
+
+  /**
+   * Adds more names from file
+   *
+   * @param filePath path to file with names
+   */
+
+  public void addNamesFromFile(String filePath) {
+    if (filePath != null) {
+      this.add(filePath);
+    }
+
   }
 
   /**
@@ -56,14 +84,14 @@ public class NamesListHandler {
    */
 
   @BeforeSuite
-  public void beforeTest() {
+  public void printNames() {
     nameList.forEach(human -> out.println(human.getName()));
   }
 
   /**
    * Method that sorts list
    */
-  @Test(priority = 1)
+  @Test(priority = 3)
   public void sortList() {
     nameList.sort(Comparator.comparing(Human::getName));
     out.println("Test method that sorts list!");
@@ -72,29 +100,38 @@ public class NamesListHandler {
   /**
    * Method that refactors all the names to CAPS
    */
-  @Test(priority = 2)
+  @Test(priority = 5)
   public void refactorNames() {
-    nameList = nameList.stream().map(human -> new Human(human.getName().toUpperCase())).toList();
+    nameList = nameList
+        .stream()
+        .map(human -> new Human(human.getName().toUpperCase(), true))
+        .toList();
+
+    out.println("Test method that refactors list!");
   }
 
-
   /**
-   * Method delete all the names that contain specific line
+   * Method shuffle list
    */
-  @Test(priority = 3)
-  public void deleteNamesWithA(String line) {
-    nameList = nameList.stream().filter(human -> !human.getName().contains(line))
-        .peek(human -> human.setProcessed(true)).toList();
+  @Test
+  public void shuffle() {
+    Collections.shuffle(nameList);
+    out.println("Test method that shuffle list!");
   }
 
   /**
-   * Prints all the names and its priority
+   * Prints all the names and its status
    */
   @AfterSuite
-  public void afterTest() {
+  public void printNamesAndStatus() {
     nameList.forEach(human -> out.println(human.getName() + " " + human.isProcessed()));
   }
 
+  /**
+   * Method gives names List
+   *
+   * @return List<Human>
+   */
   public List<Human> getNameList() {
     return nameList;
   }
